@@ -3,13 +3,16 @@
 * {
   box-sizing: border-box;
   outline: none;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background-color: #7bdaf3;
+  background: linear-gradient(135deg, #72edf2 10%, #5151e5 100%);
   font-family: 'Poppins', sans-serif;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   margin: 0;
   padding-top: 3rem;
 }
@@ -18,12 +21,22 @@ body {
   position: fixed;
   top: 1rem;
   right: 1rem;
-  background-color: #9ec862;
+  background: linear-gradient(135deg, #A8E063 0%, #56AB2F 100%);
   color: #fff;
   border: none;
-  border-radius: 3px;
-  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  padding: 0.7rem 1.5rem;
   cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.add:hover {
+  background: linear-gradient(135deg, #56AB2F 0%, #A8E063 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
 }
 
 .add:active {
@@ -32,18 +45,27 @@ body {
 
 .note {
   background-color: #fff;
-  box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   margin: 30px 20px;
   height: 400px;
-  width: 400px;
-  overflow-y: scroll;
+  width: 350px;
+  border-radius: 10px;
+  overflow-y: auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.note:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.2);
 }
 
 .note .tools {
-  background-color: #9ec862;
+  background: linear-gradient(135deg, #56ab2f, #a8e063);
   display: flex;
   justify-content: flex-end;
-  padding: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 10px 10px 0 0;
 }
 
 .note .tools button {
@@ -51,24 +73,93 @@ body {
   border: none;
   color: #fff;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.2rem;
   margin-left: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.note .tools button:hover {
+  transform: scale(1.2);
+}
+
+.note-title {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.2rem;
+  font-weight: 400;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 10px;
+  background-color: #f4f4f4;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.note-title:focus {
+  background-color: #e9e9e9;
 }
 
 .note textarea {
   outline: none;
   font-family: inherit;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   border: none;
-  height: 400px;
+  height: 300px;
   width: 100%;
   padding: 20px;
+  background-color: #f4f4f4;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.note textarea:focus {
+  background-color: #e9e9e9;
 }
 
 .main {
   padding: 20px;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: #333;
 }
 
 .hidden {
   display: none;
+}
+
+.save-confirm {
+  font-size: 0.8rem;
+  color: green;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  visibility: hidden;
+  transition: visibility 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  opacity: 0;
+}
+
+.save-confirm.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Scrollbar styles */
+.note::-webkit-scrollbar {
+  width: 8px;
+}
+
+.note::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.note::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Dragging state */
+.note.dragging {
+  opacity: 0.5;
+  border: 2px dashed #aaa;
 }
