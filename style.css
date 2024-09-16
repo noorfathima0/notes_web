@@ -1,165 +1,111 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400&display=swap');
+const addBtn = document.getElementById('add');
+let notes = JSON.parse(localStorage.getItem('notes')) || [];
 
-* {
-  box-sizing: border-box;
-  outline: none;
-  margin: 0;
-  padding: 0;
+if (notes.length) {
+    notes.forEach(note => addNewNote(note.title, note.content));
 }
 
-body {
-  background: linear-gradient(135deg, #72edf2 10%, #5151e5 100%);
-  font-family: 'Poppins', sans-serif;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 0;
-  padding-top: 3rem;
+addBtn.addEventListener('click', () => addNewNote());
+
+function addNewNote(title = '', text = '') {
+    const note = document.createElement('div');
+    note.classList.add('note');
+    note.draggable = true;
+
+    note.innerHTML = `
+        <div class="tools">
+            <button class="edit"><i class="fas fa-edit"></i></button>
+            <button class="delete"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        <input type="text" class="note-title" placeholder="Title" value="${title}">
+        <div class="main ${text ? "" : "hidden"}"></div>
+        <textarea class="${text ? "hidden" : ""}"></textarea>
+        <span class="save-confirm">Saved!</span>
+    `;
+
+    const editBtn = note.querySelector('.edit');
+    const deleteBtn = note.querySelector('.delete');
+    const main = note.querySelector('.main');
+    const textArea = note.querySelector('textarea');
+    const noteTitle = note.querySelector('.note-title');
+    const saveConfirm = note.querySelector('.save-confirm');
+
+    textArea.value = text;
+    main.innerHTML = marked(text);
+
+    deleteBtn.addEventListener('click', () => {
+        note.remove();
+        updateLS();
+    });
+
+    editBtn.addEventListener('click', () => {
+        main.classList.toggle('hidden');
+        textArea.classList.toggle('hidden');
+    });
+
+    textArea.addEventListener('input', (e) => {
+        const { value } = e.target;
+        main.innerHTML = marked(value);
+        showSaveConfirm(saveConfirm);
+        updateLS();
+    });
+
+    noteTitle.addEventListener('input', () => {
+        showSaveConfirm(saveConfirm);
+        updateLS();
+    });
+
+    note.addEventListener('dragstart', () => {
+        note.classList.add('dragging');
+    });
+
+    note.addEventListener('dragend', () => {
+        note.classList.remove('dragging');
+        updateLS();
+    });
+
+    document.body.appendChild(note);
 }
 
-.add {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  background: linear-gradient(135deg, #A8E063 0%, #56AB2F 100%);
-  color: #fff;
-  border: none;
-  border-radius: 50px;
-  padding: 0.7rem 1.5rem;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 400;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+function showSaveConfirm(saveConfirm) {
+    saveConfirm.style.visibility = 'visible';
+    setTimeout(() => {
+        saveConfirm.style.visibility = 'hidden';
+    }, 1000);
 }
 
-.add:hover {
-  background: linear-gradient(135deg, #56AB2F 0%, #A8E063 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+function updateLS() {
+    const notesElements = document.querySelectorAll('.note');
+    const notesArray = Array.from(notesElements).map(note => {
+        const title = note.querySelector('.note-title').value;
+        const content = note.querySelector('textarea').value;
+        return { title, content };
+    });
+
+    localStorage.setItem('notes', JSON.stringify(notesArray));
 }
 
-.add:active {
-  transform: scale(0.98);
-}
+document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const afterElement = getDragAfterElement(document.body, e.clientY);
+    const dragging = document.querySelector('.dragging');
+    if (afterElement == null) {
+        document.body.appendChild(dragging);
+    } else {
+        document.body.insertBefore(dragging, afterElement);
+    }
+});
 
-.note {
-  background-color: #fff;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  margin: 30px 20px;
-  height: 400px;
-  width: 350px;
-  border-radius: 10px;
-  overflow-y: auto;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-}
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.note:not(.dragging)')];
 
-.note:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.2);
-}
-
-.note .tools {
-  background: linear-gradient(135deg, #56ab2f, #a8e063);
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.6rem;
-  border-radius: 10px 10px 0 0;
-}
-
-.note .tools button {
-  background-color: transparent;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 1.2rem;
-  margin-left: 0.5rem;
-  transition: transform 0.2s ease;
-}
-
-.note .tools button:hover {
-  transform: scale(1.2);
-}
-
-.note-title {
-  width: 100%;
-  padding: 10px;
-  font-size: 1.2rem;
-  font-weight: 400;
-  border: none;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 10px;
-  background-color: #f4f4f4;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.note-title:focus {
-  background-color: #e9e9e9;
-}
-
-.note textarea {
-  outline: none;
-  font-family: inherit;
-  font-size: 1.1rem;
-  border: none;
-  height: 300px;
-  width: 100%;
-  padding: 20px;
-  background-color: #f4f4f4;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  transition: background-color 0.3s ease;
-}
-
-.note textarea:focus {
-  background-color: #e9e9e9;
-}
-
-.main {
-  padding: 20px;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  color: #333;
-}
-
-.hidden {
-  display: none;
-}
-
-.save-confirm {
-  font-size: 0.8rem;
-  color: green;
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  visibility: hidden;
-  transition: visibility 0.2s ease-in-out, opacity 0.2s ease-in-out;
-  opacity: 0;
-}
-
-.save-confirm.visible {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* Scrollbar styles */
-.note::-webkit-scrollbar {
-  width: 8px;
-}
-
-.note::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
-
-.note::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* Dragging state */
-.note.dragging {
-  opacity: 0.5;
-  border: 2px dashed #aaa;
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
